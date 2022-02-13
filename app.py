@@ -11,6 +11,17 @@ from urllib.parse import quote
 import datetime
 import time
 import pandas as pd
+import MeCab
+
+tagger = MeCab.Tagger('-d ./mecab-ko-dic')
+
+def separate_word(text):
+    node = tagger.parseToNode(text)
+    s = ""
+    while node:
+        s += f"{node.surface} "
+        node = node.next
+    return s.strip()
 
 def get_driver(url, headless=True):
     if headless:
@@ -54,14 +65,14 @@ def google_translate(driver, ko_text):
 
 def markdown_table(ko_ja_texts):
     markdown = """
-    | 韓国語 | 日本語 |
-    | --- | --- |
+    | 韓国語 | 分割 | 日本語 | 
+    | --- | --- | --- |
     """
     row_text = ""
     for ko_ja_text in ko_ja_texts:
         ko_text, ja_text = ko_ja_text
         if ko_text == "": continue
-        row_text += f"|[{ko_text}](https://www.kpedia.jp/s/1/{ko_text})|{ja_text}|\n"
+        row_text += f"|[{ko_text}](https://www.kpedia.jp/s/1/{ko_text})|{separate_word(ko_text)}|{ja_text}|\n"
     return markdown + row_text + "<br />"
         
 st.set_page_config(page_title="韓日翻訳 -単語ごとに翻訳-", layout="wide")
@@ -80,7 +91,7 @@ with st.spinner():
 st.code(translated_text)
 
 st.markdown("<h4>分かち書きごとの翻訳（Kpediaへのリンク付き）</h4>", unsafe_allow_html=True)
-sentences = ko_text.split(".")
+sentences = ".".join([t for t in ko_text.splitlines()]).split(".")
 for sentence in sentences:
     if len(sentence) == 0: continue
     st.markdown(f"<li>{sentence}</li>", unsafe_allow_html=True)
