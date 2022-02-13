@@ -3,3 +3,5 @@ bs4
 requests
 selenium
 mecab-python3
+konlpy
+mecab-ko-dic

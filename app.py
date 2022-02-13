@@ -11,17 +11,17 @@ from urllib.parse import quote
 import datetime
 import time
 import pandas as pd
+
 import MeCab
-
-tagger = MeCab.Tagger('-d ./mecab-ko-dic')
-
+import mecab_ko_dic
+tagger = MeCab.Tagger(mecab_ko_dic.MECAB_ARGS)
 def separate_word(text):
     node = tagger.parseToNode(text)
     s = ""
     while node:
         s += f"{node.surface} "
         node = node.next
-    return s.strip()
+    return s.strip()   
 
 def get_driver(url, headless=True):
     if headless:
@@ -63,6 +63,18 @@ def google_translate(driver, ko_text):
     ja_text = driver.find_element_by_xpath("//span[@lang='ja']").text
     return ja_text.strip()
 
+# def markdown_table(ko_ja_texts):
+#     markdown = """
+#     | 韓国語 | 日本語 | 
+#     | --- | --- |
+#     """
+#     row_text = ""
+#     for ko_ja_text in ko_ja_texts:
+#         ko_text, ja_text = ko_ja_text
+#         if ko_text == "": continue
+#         row_text += f"|[{ko_text}](https://www.kpedia.jp/s/1/{ko_text})|{ja_text}|\n"
+#     return markdown + row_text + "<br />"
+
 def markdown_table(ko_ja_texts):
     markdown = """
     | 韓国語 | 分割 | 日本語 | 
@@ -74,6 +86,7 @@ def markdown_table(ko_ja_texts):
         if ko_text == "": continue
         row_text += f"|[{ko_text}](https://www.kpedia.jp/s/1/{ko_text})|{separate_word(ko_text)}|{ja_text}|\n"
     return markdown + row_text + "<br />"
+
         
 st.set_page_config(page_title="韓日翻訳 -単語ごとに翻訳-", layout="wide")
 st.title("韓日翻訳")
