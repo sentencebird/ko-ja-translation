@@ -98,18 +98,21 @@ translation = st.button("翻訳する")
 if not translation: st.stop()
 
 st.markdown("<h4>文全体の翻訳</h4>", unsafe_allow_html=True)
-with st.spinner():
-    driver = google_translate_driver()
-    translated_text = google_translate(driver, ko_text)
-st.code(translated_text)
 
-st.markdown("<h4>分かち書きごとの翻訳（Kpediaへのリンク付き）</h4>", unsafe_allow_html=True)
-sentences = ".".join([t for t in ko_text.splitlines()]).split(".")
-for sentence in sentences:
-    if len(sentence) == 0: continue
-    st.markdown(f"<li>{sentence}</li>", unsafe_allow_html=True)
+try:
     with st.spinner():
-        ko_ja_texts = [[splitted, google_translate(driver, splitted)] for splitted in sentence.split(" ")]
-    st.markdown(markdown_table(ko_ja_texts), unsafe_allow_html=True)
+        driver = google_translate_driver()
+        translated_text = google_translate(driver, ko_text)
+    st.code(translated_text)
 
-driver.close()
+    st.markdown("<h4>分かち書きごとの翻訳（Kpediaへのリンク付き）</h4>", unsafe_allow_html=True)
+    sentences = ".".join([t for t in ko_text.splitlines()]).split(".")
+    for sentence in sentences:
+        if len(sentence) == 0: continue
+        st.markdown(f"<li>{sentence}</li>", unsafe_allow_html=True)
+        with st.spinner():
+            ko_ja_texts = [[splitted, google_translate(driver, splitted)] for splitted in sentence.split(" ")]
+        st.markdown(markdown_table(ko_ja_texts), unsafe_allow_html=True)
+        
+finally: 
+    driver.close()
